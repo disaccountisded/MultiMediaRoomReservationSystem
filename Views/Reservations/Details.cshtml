@@ -1,0 +1,42 @@
+@model Reservation
+@{
+    ViewData["Title"] = "Reservation Details";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <a asp-action="Index" class="text-decoration-none">&larr; Back to reservations</a>
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-white p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><div class="text-primary small fw-semibold">MULTI MEDIA ROOM</div><h1 class="h3 mb-0">Reservation Details</h1></div>
+                    @if (Model.Status == ReservationStatus.Pending)
+                    { <span class="badge text-bg-warning">Pending</span> }
+                    else if (Model.Status == ReservationStatus.Approved)
+                    { <span class="badge text-bg-success">Approved</span> }
+                    else
+                    { <span class="badge text-bg-danger">Rejected</span> }
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Requester</dt><dd class="col-sm-8">@Model.ReservedBy</dd>
+                    <dt class="col-sm-4">Email</dt><dd class="col-sm-8">@Model.Email</dd>
+                    <dt class="col-sm-4">Department</dt><dd class="col-sm-8">@Model.Department</dd>
+                    <dt class="col-sm-4">Purpose</dt><dd class="col-sm-8">@Model.Purpose</dd>
+                    <dt class="col-sm-4">Reservation date</dt><dd class="col-sm-8">@Model.ReservationDate.ToString("MMMM dd, yyyy")</dd>
+                    <dt class="col-sm-4">Start time</dt><dd class="col-sm-8">@DateTime.Today.Add(Model.StartTime).ToString("h:mm tt")</dd>
+                    <dt class="col-sm-4">End time</dt><dd class="col-sm-8">@DateTime.Today.Add(Model.EndTime).ToString("h:mm tt")</dd>
+                    <dt class="col-sm-4">Attendees</dt><dd class="col-sm-8">@Model.NumberOfAttendees</dd>
+                    <dt class="col-sm-4">Submitted</dt><dd class="col-sm-8">@Model.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</dd>
+                </dl>
+                <div class="mt-4">
+                    @if (Model.Status == ReservationStatus.Pending)
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                    }
+                    <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

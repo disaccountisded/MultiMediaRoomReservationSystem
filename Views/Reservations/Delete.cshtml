@@ -1,0 +1,25 @@
+@model Reservation
+@{
+    ViewData["Title"] = "Delete Reservation";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-danger text-white p-3"><h1 class="h4 mb-0">Delete Reservation</h1></div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning">Are you sure you want to permanently delete this reservation?</div>
+                <dl class="row">
+                    <dt class="col-sm-4">Requester</dt><dd class="col-sm-8">@Model.ReservedBy</dd>
+                    <dt class="col-sm-4">Department</dt><dd class="col-sm-8">@Model.Department</dd>
+                    <dt class="col-sm-4">Date</dt><dd class="col-sm-8">@Model.ReservationDate.ToString("MMMM dd, yyyy")</dd>
+                    <dt class="col-sm-4">Purpose</dt><dd class="col-sm-8">@Model.Purpose</dd>
+                    <dt class="col-sm-4">Status</dt><dd class="col-sm-8">@Model.Status</dd>
+                </dl>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

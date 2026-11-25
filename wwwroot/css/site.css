@@ -1,0 +1,9 @@
+html { font-size: 14px; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+body { min-height: 100vh; background: #f5f7fb; }
+.navbar-brand { letter-spacing: .2px; }
+.summary-card { border: 0; box-shadow: 0 .125rem .5rem rgba(0,0,0,.06); }
+.card { border-radius: .8rem; }
+.btn { border-radius: .45rem; }
+.form-control { padding: .65rem .75rem; }
+.purpose-cell { min-width: 150px; max-width: 230px; }
