@@ -22,13 +22,20 @@ public class ApplicationDbContextFactory
             .GetConnectionString("DefaultConnection");
 
         if (string.IsNullOrWhiteSpace(connectionString) ||
-            connectionString.Contains(
-                "YOUR_LOCAL_MYSQL",
-                StringComparison.OrdinalIgnoreCase))
+            connectionString.Contains("MYSQL_PUBLIC_URL",
+            StringComparison.OrdinalIgnoreCase) ||
+            connectionString.Contains("MYSQL_PUBLIC_URL",
+            StringComparison.OrdinalIgnoreCase) ||
+            connectionString.Contains("MYSQLDATABASE",
+            StringComparison.OrdinalIgnoreCase) ||
+            connectionString.Contains("MYSQLUSER",
+            StringComparison.OrdinalIgnoreCase) ||
+            connectionString.Contains("MYSQLPASSWORD",
+            StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
-                "DefaultConnection is missing. Configure your Railway " +
-                "public MySQL connection in User Secrets.");
+                "DefaultConnection is missing or contains placeholder values. " +
+                "Check your Railway connection in User Secrets.");
         }
 
         var optionsBuilder =
