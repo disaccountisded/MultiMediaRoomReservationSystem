@@ -15,7 +15,7 @@ This package preserves the original repository's Models, Controllers, Services, 
 1. Install the .NET 9 SDK and MySQL Server.
 2. Open `MultiMediaRoomReservationSystem.csproj` in Visual Studio 2022.
 3. Start your local MySQL server.
-4. Open `appsettings.json`.
+4. Open `appsettings.Development.json` (used only locally; `appsettings.json` keeps an empty connection string so production never falls back to a stale one). Better still, use `dotnet user-secrets set "ConnectionStrings:DefaultConnection" "..."`.
 5. Replace `YOUR_LOCAL_MYSQL_USER` and `YOUR_LOCAL_MYSQL_PASSWORD` with your local MySQL credentials. Do not commit real credentials to a public GitHub repository.
 6. Create the database if your MySQL account does not have permission to create databases:
 
@@ -73,7 +73,7 @@ Commit and push the newly generated `Migrations` folder to GitHub. The applicati
 
 For Railway, deploy the migration files and apply the migration to the Railway MySQL database. One simple approach for a school project is to temporarily use the Railway connection string as the active `DefaultConnection` when running `Update-Database`, then restore the local connection string. Alternatively, run `dotnet ef database update` with the Railway connection string supplied securely as an environment variable. Never commit the Railway password.
 
-The application does not automatically run schema migrations at startup. This is deliberate: applying schema changes automatically on every web instance startup can cause deployment/race problems. Ensure the Railway database migration has been applied before testing CRUD.
+**Update:** the app now applies pending migrations automatically at startup (`Database.Migrate()`), so a fresh Railway MySQL database gets its tables on first deploy. Set `AUTO_MIGRATE=false` to turn this off. Failures are logged and the site stays up so `/health` still works.
 
 ## D. GitHub and Railway deployment
 
@@ -82,7 +82,7 @@ The application does not automatically run schema migrations at startup. This is
 3. Generate the EF migration as described above.
 4. Commit and push the changed files and the new `Migrations` folder.
 5. In Railway, connect the GitHub repository to the ASP.NET application service.
-6. Confirm Railway detects the root `Dockerfile` (beside the `.csproj`).
+6. Railway uses the root `Dockerfile` and `railway.json` (health check on `/health`). `MYSQL_URL` is also understood.
 7. Confirm the MySQL variables are linked.
 8. Deploy and inspect Build Logs and Runtime Logs.
 9. Generate a public domain in Railway Networking.

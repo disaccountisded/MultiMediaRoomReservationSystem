@@ -19,6 +19,18 @@ if (!builder.Environment.IsDevelopment())
     var user = builder.Configuration["MYSQLUSER"];
     var password = builder.Configuration["MYSQLPASSWORD"];
 
+    var mysqlUrl = builder.Configuration["MYSQL_URL"];
+    if (string.IsNullOrWhiteSpace(connectionString) && !string.IsNullOrWhiteSpace(mysqlUrl) &&
+        Uri.TryCreate(mysqlUrl, UriKind.Absolute, out var uri))
+    {
+        var info = uri.UserInfo.Split(':', 2);
+        connectionString =
+            $"Server={uri.Host};Port={(uri.Port > 0 ? uri.Port : 3306)};" +
+            $"Database={uri.AbsolutePath.TrimStart('/')};" +
+            $"User={Uri.UnescapeDataString(info[0])};" +
+            $"Password={(info.Length > 1 ? Uri.UnescapeDataString(info[1]) : "")};";
+    }
+
     if (!string.IsNullOrWhiteSpace(host) &&
         !string.IsNullOrWhiteSpace(database) &&
         !string.IsNullOrWhiteSpace(user) &&
@@ -56,7 +68,37 @@ if (!string.IsNullOrWhiteSpace(railwayPort))
     builder.WebHost.UseUrls($"http://0.0.0.0:{railwayPort}");
 }
 
+// Railway (and most hosts) terminate HTTPS at a proxy; honour X-Forwarded-* headers.
+builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
+
+// Apply EF Core migrations on startup so a fresh Railway/hosted MySQL database
+// gets its tables automatically. Disable with AUTO_MIGRATE=false.
+if (!string.Equals(builder.Configuration["AUTO_MIGRATE"], "false", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+        logger.LogInformation("Database migrations applied.");
+    }
+    catch (Exception ex)
+    {
+        // Keep the site up so /health and logs stay reachable.
+        logger.LogError(ex, "Database migration failed.");
+    }
+}
 
 if (!app.Environment.IsDevelopment())
 {
